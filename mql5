@@ -1,0 +1,78 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                               Apocalypse XAU EA  |
+//|                                     https://www.forexroboteasy.com|
+//|                                             Forex Robot Easy Team|
+//+------------------------------------------------------------------+
+
+//--- Includes
+#include <Trade\Trade.mqh>
+#include <Trade\PositionInfo.mqh>
+
+//--- Global variables
+CTrade trade; // Trade class object
+CPositionInfo positionInfo; // PositionInfo class object
+
+//--- Input parameters
+input int FuHeZhi = 10; // Opening parameter
+
+//--- Initializing function
+int OnInit()
+{
+   //--- Set up dynamic stop loss and stop profit
+   trade.SetDynamicStopLevel(True);
+   trade.SetDynamicTakeLevel(True);
+
+   return(INIT_SUCCEEDED);
+}
+
+//--- Deinitializing function
+void OnDeinit(const int reason)
+{
+   //--- Empty
+}
+
+//--- Execution function
+void OnTick()
+{
+   //--- Check if the symbol is supported
+   if(!SymbolInfoInteger(_Symbol, SYMBOL_TRADE_ALLOWED))
+   {
+      Print('Apocalypse XAU EA does not support this symbol: ', _Symbol);
+      return;
+   }
+
+   //--- Check if there is an open position
+   if(positionInfo.Total() == 0)
+   {
+      OpenPosition();
+   }
+   else
+   {
+      ClosePosition();
+   }
+}
+
+//--- Open position function
+void OpenPosition()
+{
+   //--- Calculate stop loss and take profit
+   double stopLoss = SymbolInfoDouble(_Symbol, SYMBOL_ASK) - (FuHeZhi * SymbolInfoDouble(_Symbol, SYMBOL_POINT));
+   double takeProfit = SymbolInfoDouble(_Symbol, SYMBOL_ASK) + (FuHeZhi * SymbolInfoDouble(_Symbol, SYMBOL_POINT));
+
+   //--- Open a position
+   trade.Buy(_Symbol, 0.1, stopLoss, takeProfit, 'Apocalypse XAU EA');
+
+   //--- Print the opening details
+   Print('Opened position: ', _Symbol, ' at ', SymbolInfoDouble(_Symbol, SYMBOL_ASK), ' with stop loss at ', stopLoss, ' and take profit at ', takeProfit);
+}
+
+//--- Close position function
+void ClosePosition()
+{
+   //--- Close all open positions
+   trade.PositionCloseAll('Apocalypse XAU EA');
+
+   //--- Print the closing details
+   Print('Closed position: ', _Symbol, ' at ', SymbolInfoDouble(_Symbol, SYMBOL_ASK));
+}
